@@ -1,0 +1,159 @@
+---
+import '../styles/global.css';
+import profile from '../data/profile.json';
+
+const { name, tagline, location, cta, origin, powers, missions, personality, timeline, contact } = profile;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={`${name} — ${tagline}`} />
+		<title>{name}</title>
+	</head>
+	<body>
+		<main>
+			<!-- Hero: the Mumbai swing animation (GSAP ScrollTrigger) replaces this panel later. -->
+			<section id="hero" class="hero">
+				<p class="sfx">ZZZIP!</p>
+				<h1>{name}</h1>
+				<p class="tagline">{tagline}</p>
+				<p class="where">{location}</p>
+				<a class="cta" href={cta.href}>{cta.label}</a>
+			</section>
+
+			<section id="origin">
+				<h2 class="sfx">Origin story</h2>
+				<div class="panel">
+					{origin.map((line) => <p>{line}</p>)}
+				</div>
+			</section>
+
+			<section id="powers">
+				<h2 class="sfx">Powers</h2>
+				<div class="grid">
+					{
+						powers.map((p) => (
+							<div class="panel">
+								<strong>{p.name}</strong>
+								<div class="bar" role="meter" aria-valuenow={p.level} aria-valuemin="0" aria-valuemax="100" aria-label={p.name}>
+									<span style={`width: ${p.level}%`} />
+								</div>
+							</div>
+						))
+					}
+				</div>
+			</section>
+
+			<section id="missions">
+				<h2 class="sfx">Missions</h2>
+				<div class="grid">
+					{
+						missions.map((m) => (
+							<article class="panel">
+								<h3>{m.title}</h3>
+								<p>{m.summary}</p>
+								<p>{m.stack.map((s) => <span class="tag">{s}</span>)}</p>
+								<p>
+									{m.repo && <a href={m.repo}>Code</a>}
+									{m.repo && m.demo && ' · '}
+									{m.demo && <a href={m.demo}>Live demo</a>}
+								</p>
+							</article>
+						))
+					}
+				</div>
+			</section>
+
+			<section id="personality">
+				<h2 class="sfx">Off duty</h2>
+				<div class="grid">{personality.map((p) => <div class="panel">{p}</div>)}</div>
+			</section>
+
+			<section id="timeline">
+				<h2 class="sfx">Timeline</h2>
+				<ol class="panel timeline">
+					{
+						timeline.map((t) => (
+							<li>
+								<strong>{t.when}</strong> — {t.what}
+							</li>
+						))
+					}
+				</ol>
+			</section>
+
+			<section id="contact">
+				<h2 class="sfx">Send a signal</h2>
+				<div class="panel">
+					<ul class="links">
+						{contact.email && <li><a href={`mailto:${contact.email}`}>Email</a></li>}
+						{contact.github && <li><a href={contact.github}>GitHub</a></li>}
+						{contact.linkedin && <li><a href={contact.linkedin}>LinkedIn</a></li>}
+						{contact.cv && <li><a href={contact.cv}>Download CV</a></li>}
+					</ul>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>
+
+<style>
+	.hero {
+		min-height: 90vh;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+	.hero h1 {
+		margin: 0;
+		font-size: clamp(2.75rem, 10vw, 6rem);
+		line-height: 1;
+	}
+	.tagline {
+		font-size: 1.25rem;
+		max-width: 40ch;
+	}
+	.where {
+		opacity: 0.7;
+	}
+	.cta {
+		align-self: flex-start;
+		margin-top: 16px;
+		padding: 12px 24px;
+		background: var(--accent);
+		color: var(--ink);
+		font-weight: 800;
+		text-decoration: none;
+		border: var(--panel-border);
+		border-radius: var(--radius);
+		box-shadow: 4px 4px 0 var(--bone);
+	}
+	.bar {
+		height: 10px;
+		margin-top: 8px;
+		border: 2px solid var(--ink);
+		border-radius: 999px;
+		overflow: hidden;
+	}
+	.bar span {
+		display: block;
+		height: 100%;
+		background: var(--accent);
+	}
+	.timeline {
+		padding-left: 40px;
+	}
+	.links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+</style>

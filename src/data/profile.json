@@ -1,0 +1,55 @@
+{
+  "name": "Raj Joshi",
+  "tagline": "TODO: one-line identity — what should people remember after 10 seconds?",
+  "location": "Mumbai",
+  "cta": { "label": "See my missions", "href": "#missions" },
+  "origin": [
+    "TODO: where you started.",
+    "TODO: the turning point.",
+    "TODO: what you build now and why."
+  ],
+  "powers": [
+    { "name": "TODO skill", "level": 80 },
+    { "name": "TODO skill", "level": 70 },
+    { "name": "TODO skill", "level": 60 }
+  ],
+  "missions": [
+    {
+      "title": "Prayog",
+      "summary": "Simulated stock exchange and bot arena.",
+      "stack": ["TODO"],
+      "repo": "https://github.com/rj8228/prayog",
+      "demo": ""
+    },
+    {
+      "title": "TODO mission 2",
+      "summary": "TODO: problem it solves.",
+      "stack": ["TODO"],
+      "repo": "",
+      "demo": ""
+    },
+    {
+      "title": "TODO mission 3",
+      "summary": "TODO: problem it solves.",
+      "stack": ["TODO"],
+      "repo": "",
+      "demo": ""
+    }
+  ],
+  "personality": [
+    "Mathematician: group theory and puzzles",
+    "Musician: piano, DJing, production",
+    "Strategist: game theory and strategy games",
+    "Mind: psychology"
+  ],
+  "timeline": [
+    { "when": "TODO", "what": "TODO: education or role" },
+    { "when": "TODO", "what": "TODO: education or role" }
+  ],
+  "contact": {
+    "email": "",
+    "github": "https://github.com/rj8228",
+    "linkedin": "",
+    "cv": ""
+  }
+}

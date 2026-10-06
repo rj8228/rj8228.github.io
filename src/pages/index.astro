@@ -2,7 +2,10 @@
 import '../styles/global.css';
 import profile from '../data/profile.json';
 
-const { name, tagline, location, cta, origin, powers, missions, personality, timeline, contact } = profile;
+const { name, role, tagline, location, cta, origin, powers, missions, personality, timeline, contact } = profile;
+
+// External links open in a new tab.
+const ext = { target: '_blank', rel: 'noopener noreferrer' };
 ---
 
 <html lang="en">
@@ -21,6 +24,7 @@ const { name, tagline, location, cta, origin, powers, missions, personality, tim
 			<section id="hero" class="hero">
 				<p class="sfx">ZZZIP!</p>
 				<h1>{name}</h1>
+				<p class="role">{role}</p>
 				<p class="tagline">{tagline}</p>
 				<p class="where">{location}</p>
 				<a class="cta" href={cta.href}>{cta.label}</a>
@@ -39,10 +43,8 @@ const { name, tagline, location, cta, origin, powers, missions, personality, tim
 					{
 						powers.map((p) => (
 							<div class="panel">
-								<strong>{p.name}</strong>
-								<div class="bar" role="meter" aria-valuenow={p.level} aria-valuemin="0" aria-valuemax="100" aria-label={p.name}>
-									<span style={`width: ${p.level}%`} />
-								</div>
+								<h3>{p.name}</h3>
+								<p>{p.items.map((i) => <span class="tag">{i}</span>)}</p>
 							</div>
 						))
 					}
@@ -58,11 +60,11 @@ const { name, tagline, location, cta, origin, powers, missions, personality, tim
 								<h3>{m.title}</h3>
 								<p>{m.summary}</p>
 								<p>{m.stack.map((s) => <span class="tag">{s}</span>)}</p>
-								<p>
-									{m.repo && <a href={m.repo}>Code</a>}
-									{m.repo && m.demo && ' · '}
-									{m.demo && <a href={m.demo}>Live demo</a>}
-								</p>
+								{m.links.length > 0 && (
+									<p class="mission-links">
+										{m.links.map((l) => <a href={l.href} {...ext}>{l.label}</a>)}
+									</p>
+								)}
 							</article>
 						))
 					}
@@ -76,7 +78,7 @@ const { name, tagline, location, cta, origin, powers, missions, personality, tim
 
 			<section id="timeline">
 				<h2 class="sfx">Timeline</h2>
-				<ol class="panel timeline">
+				<ul class="panel timeline">
 					{
 						timeline.map((t) => (
 							<li>
@@ -84,17 +86,17 @@ const { name, tagline, location, cta, origin, powers, missions, personality, tim
 							</li>
 						))
 					}
-				</ol>
+				</ul>
 			</section>
 
 			<section id="contact">
 				<h2 class="sfx">Send a signal</h2>
 				<div class="panel">
 					<ul class="links">
-						{contact.email && <li><a href={`mailto:${contact.email}`}>Email</a></li>}
-						{contact.github && <li><a href={contact.github}>GitHub</a></li>}
-						{contact.linkedin && <li><a href={contact.linkedin}>LinkedIn</a></li>}
-						{contact.cv && <li><a href={contact.cv}>Download CV</a></li>}
+						{contact.email && <li><a href={`mailto:${contact.email}`}>{contact.email}</a></li>}
+						{contact.github && <li><a href={contact.github} {...ext}>GitHub</a></li>}
+						{contact.linkedin && <li><a href={contact.linkedin} {...ext}>LinkedIn</a></li>}
+						{contact.cv && <li><a href={contact.cv} {...ext}>Download CV</a></li>}
 					</ul>
 				</div>
 			</section>
@@ -133,17 +135,14 @@ const { name, tagline, location, cta, origin, powers, missions, personality, tim
 		border-radius: var(--radius);
 		box-shadow: 4px 4px 0 var(--bone);
 	}
-	.bar {
-		height: 10px;
-		margin-top: 8px;
-		border: 2px solid var(--ink);
-		border-radius: 999px;
-		overflow: hidden;
+	.role {
+		margin: 8px 0 0;
+		font-weight: 700;
+		color: var(--accent);
 	}
-	.bar span {
-		display: block;
-		height: 100%;
-		background: var(--accent);
+	.mission-links {
+		display: flex;
+		gap: 16px;
 	}
 	.timeline {
 		padding-left: 40px;

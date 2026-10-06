@@ -1,39 +1,64 @@
 {
   "name": "Raj Joshi",
-  "tagline": "TODO: one-line identity — what should people remember after 10 seconds?",
-  "location": "Mumbai",
+  "role": "Software Engineer · Full-Stack (Java, React) · Finance & AI",
+  "tagline": "Generalist engineer at the intersection of computer science, finance and game theory.",
+  "location": "Mumbai, India",
   "cta": { "label": "See my missions", "href": "#missions" },
   "origin": [
-    "TODO: where you started.",
-    "TODO: the turning point.",
-    "TODO: what you build now and why."
+    "Five years at J.P. Morgan turning business-user needs into production full-stack systems, first in Index Research, now in Portfolio Insights for Asset & Wealth Management.",
+    "I own features end to end, work closely with product owners and operations teams, mentor junior engineers, and keep production systems reliable.",
+    "Outside work I build multi-agent AI on AWS Bedrock and Google Vertex AI, and playgrounds that turn maths, markets and music into something you can touch. I learn new domains fast and ship end to end."
   ],
   "powers": [
-    { "name": "TODO skill", "level": 80 },
-    { "name": "TODO skill", "level": 70 },
-    { "name": "TODO skill", "level": 60 }
+    {
+      "name": "AI",
+      "items": ["LLM agents (Bedrock, Vertex AI, Gemini, ADK)", "MCP", "Multi-agent design", "Context engineering", "Prompt engineering", "Agent skills"]
+    },
+    {
+      "name": "Backend",
+      "items": ["Java", "Spring Boot", "Python", "FastAPI", "Django", "Kafka", "REST", "Lucene"]
+    },
+    {
+      "name": "Frontend",
+      "items": ["React", "Redux", "Vite", "JavaScript", "TypeScript"]
+    },
+    {
+      "name": "Data & Cloud",
+      "items": ["AWS (EKS, ECS, EMR, Lambda, Bedrock)", "Docker", "Terraform", "PostgreSQL", "DynamoDB", "Redis"]
+    },
+    {
+      "name": "Engineering",
+      "items": ["CI/CD", "Jenkins", "Git", "Sonar", "Cypress/Cucumber BDD"]
+    },
+    {
+      "name": "Domain",
+      "items": ["Asset management", "Model portfolios", "ETFs", "Portfolio analytics", "Client reporting"]
+    }
   ],
   "missions": [
     {
+      "title": "Galois",
+      "summary": "Learn group theory by turning a Rubik's cube: turn a 3D cube, notice what happens, then learn the name for it, from identity and permutations to why every position solves in 20 moves.",
+      "stack": ["TypeScript", "3D", "Vitest", "Playwright"],
+      "links": [
+        { "label": "Live", "href": "https://rj8228.github.io/galois/" },
+        { "label": "Code", "href": "https://github.com/rj8228/galois" }
+      ]
+    },
+    {
       "title": "Prayog",
-      "summary": "Simulated stock exchange and bot arena.",
-      "stack": ["TODO"],
-      "repo": "https://github.com/rj8228/prayog",
-      "demo": ""
+      "summary": "A simulated stock exchange and bot arena: simulated traders make the market; people trade by hand or with their own bots.",
+      "stack": ["Java", "Python", "TypeScript", "Kafka", "PostgreSQL", "Redis", "Docker"],
+      "links": [
+        { "label": "How it works", "href": "https://rj8228.github.io/prayog/" },
+        { "label": "Code", "href": "https://github.com/rj8228/prayog" }
+      ]
     },
     {
-      "title": "TODO mission 2",
-      "summary": "TODO: problem it solves.",
-      "stack": ["TODO"],
-      "repo": "",
-      "demo": ""
-    },
-    {
-      "title": "TODO mission 3",
-      "summary": "TODO: problem it solves.",
-      "stack": ["TODO"],
-      "repo": "",
-      "demo": ""
+      "title": "Personal Financial Intelligence Agent",
+      "summary": "Google Cloud Agentic AI Day (Jul 2025): an agent that gives personalised financial insights using Fi Money's MCP server. Shortlisted in the top 700 teams of 57,000+ developers.",
+      "stack": ["Gemini", "Google ADK", "Vertex AI", "MCP"],
+      "links": []
     }
   ],
   "personality": [
@@ -43,13 +68,19 @@
     "Mind: psychology"
   ],
   "timeline": [
-    { "when": "TODO", "what": "TODO: education or role" },
-    { "when": "TODO", "what": "TODO: education or role" }
+    { "when": "2025 – 2026", "what": "City Lead & SME, AWS AI League, J.P. Morgan Mumbai Tech Center" },
+    { "when": "Jul 2025", "what": "Top 700 of 57,000+ developers, Google Cloud Agentic AI Day" },
+    { "when": "May 2025 – now", "what": "Associate, Software Engineer II, Portfolio Insights (Asset & Wealth Management), J.P. Morgan" },
+    { "when": "2024", "what": "Co-led the DeepRacer competition for 700+ participants" },
+    { "when": "2023", "what": "Led a team of 6 to 2nd place in the DeepRacer competition" },
+    { "when": "2022", "what": "Winner, SEPathon hackathon" },
+    { "when": "Jul 2021 – Apr 2025", "what": "Analyst & Associate, Software Engineer II, Index Research, J.P. Morgan" },
+    { "when": "2021", "what": "Winner, Induction Program: built an algorithmic-trading training app" }
   ],
   "contact": {
-    "email": "",
+    "email": "rj8228@gmail.com",
     "github": "https://github.com/rj8228",
-    "linkedin": "",
+    "linkedin": "https://www.linkedin.com/in/rj8228/",
     "cv": ""
   }
 }

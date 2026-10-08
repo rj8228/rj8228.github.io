@@ -1,13 +1,13 @@
 {
   "name": "Raj Joshi",
-  "role": "Software Engineer · Full-Stack (Java, React) · Finance & AI",
+  "role": "Software Engineer · Full-Stack (Java, Python, React) · Finance & AI",
   "tagline": "Generalist engineer at the intersection of computer science, finance and game theory.",
   "location": "Mumbai, India",
   "cta": { "label": "See my missions", "href": "#missions" },
   "origin": [
     "Five years at J.P. Morgan turning business-user needs into production full-stack systems, first in Index Research, now in Portfolio Insights for Asset & Wealth Management.",
     "I own features end to end, work closely with product owners and operations teams, mentor junior engineers, and keep production systems reliable.",
-    "Outside work I build multi-agent AI on AWS Bedrock and Google Vertex AI, and playgrounds that turn maths, markets and music into something you can touch. I learn new domains fast and ship end to end."
+    "Outside work, I build systems, frameworks and playgrounds that turn maths, markets and music into something you can touch. I learn new domains fast and ship end to end."
   ],
   "powers": [
     {
@@ -68,14 +68,17 @@
     "Mind: psychology"
   ],
   "timeline": [
-    { "when": "2025 – 2026", "what": "City Lead & SME, AWS AI League, J.P. Morgan Mumbai Tech Center" },
-    { "when": "Jul 2025", "what": "Top 700 of 57,000+ developers, Google Cloud Agentic AI Day" },
-    { "when": "May 2025 – now", "what": "Associate, Software Engineer II, Portfolio Insights (Asset & Wealth Management), J.P. Morgan" },
-    { "when": "2024", "what": "Co-led the DeepRacer competition for 700+ participants" },
-    { "when": "2023", "what": "Led a team of 6 to 2nd place in the DeepRacer competition" },
-    { "when": "2022", "what": "Winner, SEPathon hackathon" },
-    { "when": "Jul 2021 – Apr 2025", "what": "Analyst & Associate, Software Engineer II, Index Research, J.P. Morgan" },
-    { "when": "2021", "what": "Winner, Induction Program: built an algorithmic-trading training app" }
+    { "when": "2015", "kind": "education", "what": "Secondary School Certificate (SSC)", "where": "St. Francis High School, Bhayandar" },
+    { "when": "2015 – 2017", "kind": "education", "what": "Higher Secondary Certificate (HSC)", "where": "Swami Vivekanand Junior College, Dahisar" },
+    { "when": "2017 – 2021", "kind": "education", "what": "Bachelor of Engineering (B.E.) in Computer Engineering", "where": "Vivekanand Education Society's Institute of Technology (VESIT), Chembur · University of Mumbai" },
+    { "when": "Jul 2021 – Apr 2025", "kind": "work", "what": "Analyst & Associate, Software Engineer II", "where": "Index Research, J.P. Morgan" },
+    { "when": "2021", "kind": "award", "what": "Winner, Induction Program: wrote the algorithmic-trading strategy for a provided exchange and app" },
+    { "when": "2022", "kind": "award", "what": "Winner, SEPathon hackathon" },
+    { "when": "2023", "kind": "award", "what": "Led a team of 6 to 2nd place in the DeepRacer competition, J.P. Morgan Mumbai Tech Center (MTC)" },
+    { "when": "2024", "kind": "award", "what": "Co-led the DeepRacer competition for 700+ participants, J.P. Morgan Mumbai Tech Center (MTC)" },
+    { "when": "May 2025 – now", "kind": "work", "what": "Associate, Software Engineer II", "where": "Portfolio Insights (Asset & Wealth Management), J.P. Morgan" },
+    { "when": "Jul 2025", "kind": "award", "what": "Top 700 of 57,000+ developers, Google Cloud Agentic AI Day" },
+    { "when": "2025 – 2026", "kind": "award", "what": "City Lead & SME, AWS AI League, J.P. Morgan Mumbai Tech Center (MTC)" }
   ],
   "contact": {
     "email": "rj8228@gmail.com",

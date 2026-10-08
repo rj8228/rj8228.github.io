@@ -1,48 +1,87 @@
 ---
+// Homepage: comic-style sections with still poses; the painted train scene fills the hero.
 import '../styles/global.css';
 import profile from '../data/profile.json';
+import poses from '../../public/hero/poses.json';
 
 const { name, role, tagline, location, cta, origin, powers, missions, personality, timeline, contact } = profile;
-
-// External links open in a new tab.
 const ext = { target: '_blank', rel: 'noopener noreferrer' };
+const img = (id: string) => `/hero/${id}.webp`;
+// Every pose is drawn at the same scale (pixels of art per screen pixel), so the character is the
+// same size in each section; a crouch is simply shorter than a stretch.
+const POSE_SCALE = 0.17;
+const pose = (id: keyof typeof poses, x: number) => ({
+	class: `head-pose ${id}`,
+	src: img(id),
+	alt: '',
+	style: `--x: ${x}; --h: ${Math.round(poses[id].h * POSE_SCALE)}px`,
+});
+// Timeline chapters: each study or work milestone opens a chapter; wins attach to the chapter they happened in.
+type Entry = (typeof timeline)[number] & { where?: string };
+const chapters: (Entry & { wins: Entry[] })[] = [];
+for (const t of timeline as Entry[]) {
+	if (t.kind === 'award') chapters.at(-1)?.wins.push(t);
+	else chapters.push({ ...t, wins: [] });
+}
+const chapterLabel = { education: 'Study', work: 'Work' };
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={`${name} — ${tagline}`} />
 		<title>{name}</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" />
 	</head>
-	<body>
-		<main>
-			<!-- Hero: the Mumbai swing animation (GSAP ScrollTrigger) replaces this panel later. -->
-			<section id="hero" class="hero">
-				<p class="sfx">ZZZIP!</p>
-				<h1>{name}</h1>
-				<p class="role">{role}</p>
-				<p class="tagline">{tagline}</p>
-				<p class="where">{location}</p>
-				<a class="cta" href={cta.href}>{cta.label}</a>
-			</section>
+	<body class="banner">
+		<header class="hero">
+			<div class="hero-banner" aria-hidden="true"><img src={img('scene')} alt="" /></div>
+			<div class="hero-inner">
+				<div class="hero-copy">
+					<p class="sfx-small">ZZZIP!</p>
+					<h1>{name}</h1>
+					<p class="role">{role}</p>
+					<p class="tagline">{tagline}</p>
+					<p class="where">{location}</p>
+					<div class="actions">
+						<a class="btn primary" href={cta.href}>{cta.label}</a>
+						<a class="btn ghost" href="#contact">Send a signal</a>
+					</div>
+				</div>
+				<figure class="hero-art">
+					<div class="burst" aria-hidden="true"></div>
+					<img src={img('wave')} alt={`Illustration of ${name} waving`} />
+					<figcaption class="bubble">Hi! I build software for finance and AI.</figcaption>
+				</figure>
+			</div>
+		</header>
 
+		<main>
 			<section id="origin">
-				<h2 class="sfx">Origin story</h2>
-				<div class="panel">
+				<div class="section-head">
+					<h2 class="sfx">Origin story</h2>
+					<img {...pose('crouch', 0.42)} />
+				</div>
+				<div class="panel origin">
 					{origin.map((line) => <p>{line}</p>)}
 				</div>
 			</section>
 
 			<section id="powers">
-				<h2 class="sfx">Powers</h2>
+				<div class="section-head">
+					<h2 class="sfx">Powers</h2>
+					<img {...pose('web-shot', 0.52)} />
+				</div>
 				<div class="grid">
 					{
 						powers.map((p) => (
-							<div class="panel">
+							<div class="panel power">
 								<h3>{p.name}</h3>
 								<p>{p.items.map((i) => <span class="tag">{i}</span>)}</p>
 							</div>
@@ -52,17 +91,21 @@ const ext = { target: '_blank', rel: 'noopener noreferrer' };
 			</section>
 
 			<section id="missions">
-				<h2 class="sfx">Missions</h2>
+				<div class="section-head">
+					<h2 class="sfx">Missions</h2>
+					<img {...pose('swing-low', 0.62)} />
+				</div>
 				<div class="grid">
 					{
-						missions.map((m) => (
-							<article class="panel">
+						missions.map((m, i) => (
+							<article class="panel mission">
+								<p class="mno">Mission {String(i + 1).padStart(2, '0')}</p>
 								<h3>{m.title}</h3>
 								<p>{m.summary}</p>
 								<p>{m.stack.map((s) => <span class="tag">{s}</span>)}</p>
 								{m.links.length > 0 && (
 									<p class="mission-links">
-										{m.links.map((l) => <a href={l.href} {...ext}>{l.label}</a>)}
+										{m.links.map((l) => <a class="btn small" href={l.href} {...ext}>{l.label}</a>)}
 									</p>
 								)}
 							</article>
@@ -72,87 +115,545 @@ const ext = { target: '_blank', rel: 'noopener noreferrer' };
 			</section>
 
 			<section id="personality">
-				<h2 class="sfx">Off duty</h2>
-				<div class="grid">{personality.map((p) => <div class="panel">{p}</div>)}</div>
+				<div class="section-head">
+					<h2 class="sfx">Off duty</h2>
+					<img {...pose('flip', 0.72)} />
+				</div>
+				<div class="grid four">
+					{
+						personality.map((p) => {
+							const [title, rest] = p.split(': ');
+							return (
+								<div class="panel duty">
+									<h3>{title}</h3>
+									<p>{rest}</p>
+								</div>
+							);
+						})
+					}
+				</div>
 			</section>
 
 			<section id="timeline">
-				<h2 class="sfx">Timeline</h2>
-				<ul class="panel timeline">
+				<div class="section-head">
+					<h2 class="sfx">Timeline</h2>
+					<img {...pose('land', 0.82)} />
+				</div>
+				<ol class="chapters">
 					{
-						timeline.map((t) => (
-							<li>
-								<strong>{t.when}</strong> — {t.what}
+						chapters.map((c) => (
+							<li class={`chapter ${c.kind}`}>
+								<article class="panel chapter-card">
+									<p class="c-meta">
+										<span class="c-kind">{chapterLabel[c.kind as keyof typeof chapterLabel]}</span>
+										<span class="c-when">{c.when}</span>
+									</p>
+									<h3>{c.what}</h3>
+									{c.where && <p class="c-where">{c.where}</p>}
+									{c.wins.length > 0 && (
+										<ul class="wins">
+											{c.wins.map((w) => (
+												<li>
+													<span class="w-when">{w.when}</span>
+													<span>{w.what}</span>
+												</li>
+											))}
+										</ul>
+									)}
+								</article>
 							</li>
 						))
 					}
-				</ul>
+				</ol>
 			</section>
 
 			<section id="contact">
-				<h2 class="sfx">Send a signal</h2>
-				<div class="panel">
-					<ul class="links">
-						{contact.email && <li><a href={`mailto:${contact.email}`}>{contact.email}</a></li>}
-						{contact.github && <li><a href={contact.github} {...ext}>GitHub</a></li>}
-						{contact.linkedin && <li><a href={contact.linkedin} {...ext}>LinkedIn</a></li>}
-						{contact.cv && <li><a href={contact.cv} {...ext}>Download CV</a></li>}
-					</ul>
+				<div class="section-head">
+					<h2 class="sfx">Send a signal</h2>
+					<img {...pose('wave', 0.92)} />
+				</div>
+				<div class="contact">
+					<div class="panel signal">
+						<p class="signal-line">Building something in finance, AI or learning? Let's talk.</p>
+						<p class="links">
+							{contact.email && <a class="btn primary" href={`mailto:${contact.email}`}>Email me</a>}
+							{contact.github && <a class="btn small" href={contact.github} {...ext}>GitHub</a>}
+							{contact.linkedin && <a class="btn small" href={contact.linkedin} {...ext}>LinkedIn</a>}
+						</p>
+					</div>
 				</div>
 			</section>
 		</main>
+
+		<style is:global>
+			h1,
+			h2,
+			h3,
+			.sfx,
+			.sfx-small,
+			.mno {
+				font-family: 'Bangers', Impact, system-ui, sans-serif;
+				font-weight: 400;
+				letter-spacing: 0.04em;
+			}
+			.sfx {
+				font-size: clamp(2.5rem, 7vw, 4rem);
+			}
+			h3 {
+				margin: 0 0 8px;
+				font-size: 1.6rem;
+			}
+
+			/* Hero */
+			.hero {
+				position: relative;
+				overflow: hidden;
+				border-bottom: 4px solid var(--ink);
+				background:
+					radial-gradient(circle at 75% 55%, var(--night-2) 0 30%, transparent 60%),
+					var(--night);
+			}
+			.hero-inner {
+				position: relative;
+				display: grid;
+				grid-template-columns: 1.1fr 0.9fr;
+				align-items: end;
+				gap: 24px;
+				max-width: 1040px;
+				min-height: min(92vh, 820px);
+				margin: 0 auto;
+				padding: 48px 16px 0;
+			}
+			.hero-copy {
+				align-self: center;
+				padding-bottom: 48px;
+			}
+			.sfx-small {
+				display: inline-block;
+				margin: 0;
+				font-size: 2rem;
+				color: var(--accent);
+				transform: rotate(-6deg);
+				text-shadow: 3px 3px 0 var(--ink);
+			}
+			.hero h1 {
+				margin: 4px 0 0;
+				font-size: clamp(3.5rem, 11vw, 7.5rem);
+				line-height: 0.9;
+				color: var(--bone);
+				text-shadow: 5px 5px 0 var(--accent), 9px 9px 0 var(--ink);
+			}
+			.role {
+				margin: 20px 0 0;
+				font-weight: 700;
+				color: var(--accent);
+			}
+			.tagline {
+				margin: 12px 0 0;
+				max-width: 36ch;
+				font-size: 1.25rem;
+			}
+			.where {
+				margin: 8px 0 0;
+				opacity: 0.7;
+			}
+			.actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px;
+				margin-top: 24px;
+			}
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				min-height: 44px;
+				padding: 0 20px;
+				border: var(--panel-border);
+				border-radius: var(--radius);
+				font-weight: 800;
+				text-decoration: none;
+			}
+			.btn.primary {
+				background: var(--accent);
+				color: var(--ink);
+				box-shadow: 4px 4px 0 var(--bone);
+			}
+			.btn.ghost {
+				border-color: var(--bone);
+				color: var(--bone);
+			}
+			.panel .btn.small,
+			.btn.small {
+				min-height: 40px;
+				padding: 0 14px;
+				background: var(--ink);
+				color: var(--bone);
+			}
+			.panel .btn.primary {
+				color: var(--ink);
+				box-shadow: 4px 4px 0 var(--ink);
+			}
+			.hero-art {
+				position: relative;
+				margin: 0;
+				align-self: end;
+				justify-self: center;
+			}
+			.hero-art img {
+				position: relative;
+				display: block;
+				height: min(78vh, 700px);
+				width: auto;
+			}
+			.burst {
+				position: absolute;
+				left: 50%;
+				top: 18%;
+				width: 120%;
+				aspect-ratio: 1;
+				transform: translateX(-50%);
+				border-radius: 50%;
+				background: radial-gradient(var(--accent) 1.6px, transparent 2px) 0 0 / 12px 12px;
+				mask-image: radial-gradient(circle, #000 25%, transparent 70%);
+				opacity: 0.55;
+			}
+			.bubble {
+				position: absolute;
+				right: 72%;
+				top: 6%;
+				width: 200px;
+				padding: 12px 16px;
+				background: var(--bone);
+				color: var(--ink);
+				border: var(--panel-border);
+				border-radius: 18px;
+				font-weight: 700;
+				line-height: 1.3;
+			}
+			.bubble::after {
+				content: '';
+				position: absolute;
+				right: -18px;
+				top: 28px;
+				border: 10px solid transparent;
+				border-left: 16px solid var(--ink);
+			}
+
+			/* Banner variant: the painted train scene fills the hero */
+			.hero-banner {
+				display: none;
+			}
+			.banner .hero-banner {
+				display: block;
+				position: absolute;
+				inset: 0 42% 0 0;
+			}
+			.banner .hero-banner img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: 48% 30%;
+				mask-image: linear-gradient(90deg, #000 55%, transparent 98%);
+			}
+			.banner .hero-banner::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background: none;
+			}
+			.banner .hero-inner {
+				grid-template-columns: 1fr 1fr;
+			}
+			.banner .hero-copy {
+				grid-column: 2;
+			}
+			.banner .hero-art {
+				display: none;
+			}
+
+			/* Sections */
+			.origin p {
+				font-size: 1.1rem;
+			}
+			.origin p:first-child::first-letter {
+				float: left;
+				margin: 4px 8px 0 0;
+				font: 3.4rem/0.8 'Bangers', Impact, sans-serif;
+				color: var(--accent);
+				-webkit-text-stroke: 1px var(--ink);
+			}
+			.power,
+			.mission,
+			.duty {
+				transition: transform 0.15s;
+			}
+			.power:hover,
+			.mission:hover,
+			.duty:hover {
+				transform: translate(-3px, -3px) rotate(-0.5deg);
+			}
+			.section-head {
+				position: relative;
+			}
+			/* One pose per section tells the story down the page (crouch, web, swing, flip, land, wave),
+			   drifting left to right; the bottom 35% of each pose overlaps the section's first panel. */
+			.head-pose {
+				position: absolute;
+				z-index: 1;
+				left: calc(var(--x) * 100%);
+				bottom: -46px;
+				height: var(--h);
+				transform: translateX(-50%);
+			}
+			.head-pose.flip {
+				transform: translateX(-50%) rotate(-12deg);
+			}
+			/* Room under the overlapping pose so it never covers text. */
+			.section-head + .panel,
+			.section-head + .contact .panel,
+			.section-head + .grid > :nth-child(-n + 4) {
+				padding-top: 64px;
+			}
+			.mno {
+				margin: 0;
+				font-size: 1rem;
+				color: #9a5b00;
+			}
+			.mission {
+				display: flex;
+				flex-direction: column;
+			}
+			.mission-links {
+				display: flex;
+				gap: 10px;
+				margin-top: auto;
+			}
+			.four {
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			}
+			.duty p {
+				margin: 0;
+			}
+			/* Timeline: chapters alternate either side of a centre spine, like panels on a comic page. */
+			.chapters {
+				position: relative;
+				display: grid;
+				gap: 28px;
+				margin: 0;
+				padding: 8px 0;
+				list-style: none;
+			}
+			.chapters::before {
+				content: '';
+				position: absolute;
+				left: 50%;
+				top: 0;
+				bottom: 0;
+				width: 6px;
+				transform: translateX(-50%);
+				background: repeating-linear-gradient(var(--accent) 0 14px, transparent 14px 22px);
+			}
+			.chapter {
+				position: relative;
+				width: calc(50% - 40px);
+			}
+			.chapter:nth-child(even) {
+				margin-left: calc(50% + 40px);
+			}
+			/* Stagger: each chapter starts before the one opposite it ends. */
+			.chapter + .chapter {
+				margin-top: -64px;
+			}
+			/* Each chapter's node on the spine, joined to its card by a short arm. */
+			.chapter::before,
+			.chapter::after {
+				content: '';
+				position: absolute;
+				top: 30px;
+			}
+			.chapter::before {
+				right: -40px;
+				width: 40px;
+				border-top: 3px solid var(--bone);
+			}
+			.chapter::after {
+				right: -51px;
+				top: 20px;
+				width: 22px;
+				height: 22px;
+				border: 3px solid var(--ink);
+				border-radius: 50%;
+				background: var(--accent);
+			}
+			.chapter:nth-child(even)::before {
+				right: auto;
+				left: -40px;
+			}
+			.chapter:nth-child(even)::after {
+				right: auto;
+				left: -51px;
+			}
+			.chapter.education::after {
+				background: #6fa8dc;
+			}
+			.chapter-card {
+				padding: 20px 22px;
+			}
+			.chapter.education .chapter-card {
+				box-shadow: 6px 6px 0 #6fa8dc;
+			}
+			.c-meta {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin: 0 0 6px;
+			}
+			.c-kind {
+				padding: 1px 8px;
+				border: 2px solid var(--ink);
+				border-radius: 4px;
+				font-size: 0.7rem;
+				font-weight: 800;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				background: var(--accent);
+			}
+			.education .c-kind {
+				background: #cfe0f2;
+			}
+			.c-when {
+				font: 1.5rem/1 'Bangers', Impact, sans-serif;
+				letter-spacing: 0.04em;
+			}
+			.chapter-card h3 {
+				margin: 0;
+				font-family: system-ui, sans-serif;
+				font-size: 1.05rem;
+				font-weight: 800;
+				letter-spacing: 0;
+			}
+			.c-where {
+				margin: 4px 0 0;
+				color: #4a4f66;
+			}
+			.wins {
+				display: grid;
+				gap: 10px;
+				margin: 16px 0 0;
+				padding: 14px 0 0;
+				border-top: 2px dashed var(--ink);
+				list-style: none;
+			}
+			.wins li {
+				position: relative;
+				display: grid;
+				grid-template-columns: 82px 1fr;
+				gap: 8px;
+				padding-left: 30px;
+				font-size: 0.92rem;
+				line-height: 1.4;
+			}
+			/* Comic star burst marking each win. */
+			.wins li::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 20px;
+				height: 20px;
+				background: var(--accent);
+				clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+			}
+			.w-when {
+				font-weight: 800;
+			}
+			.contact {
+				display: flex;
+				align-items: end;
+				gap: 24px;
+			}
+			.signal {
+				flex: 1;
+				align-self: center;
+			}
+			.signal-line {
+				margin-top: 0;
+				font-size: 1.2rem;
+				font-weight: 700;
+			}
+			.links {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px;
+				margin: 0;
+			}
+
+			@media (max-width: 760px) {
+				.hero-inner,
+				.banner .hero-inner {
+					grid-template-columns: 1fr;
+					padding-top: 32px;
+				}
+				.banner .hero-banner {
+					inset: 0 0 45% 0;
+				}
+				.banner .hero-copy {
+					grid-column: 1;
+					padding-top: 46vh;
+				}
+				.banner .hero-banner::after {
+					background: linear-gradient(transparent 60%, var(--night) 100%);
+				}
+				.hero-copy {
+					padding-bottom: 0;
+				}
+				.hero-art img {
+					height: 52vh;
+				}
+				.bubble {
+					right: auto;
+					left: 55%;
+					width: 150px;
+					font-size: 0.85rem;
+				}
+				.bubble::after {
+					display: none;
+				}
+				.head-pose {
+					left: auto;
+					right: 0;
+					height: calc(var(--h) * 0.6);
+					bottom: -28px;
+					transform: none;
+				}
+				.head-pose.flip {
+					transform: rotate(-12deg);
+				}
+				.chapters::before {
+					left: 11px;
+				}
+				.chapter,
+				.chapter:nth-child(even) {
+					width: auto;
+					margin-left: 40px;
+				}
+				.chapter + .chapter {
+					margin-top: 0;
+				}
+				.chapter::before,
+				.chapter:nth-child(even)::before {
+					display: none;
+				}
+				.chapter::after,
+				.chapter:nth-child(even)::after {
+					left: -40px;
+					right: auto;
+				}
+				.wins li {
+					grid-template-columns: 1fr;
+					gap: 0;
+				}
+			}
+		</style>
 	</body>
 </html>
-
-<style>
-	.hero {
-		min-height: 90vh;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-	}
-	.hero h1 {
-		margin: 0;
-		font-size: clamp(2.75rem, 10vw, 6rem);
-		line-height: 1;
-	}
-	.tagline {
-		font-size: 1.25rem;
-		max-width: 40ch;
-	}
-	.where {
-		opacity: 0.7;
-	}
-	.cta {
-		align-self: flex-start;
-		margin-top: 16px;
-		padding: 12px 24px;
-		background: var(--accent);
-		color: var(--ink);
-		font-weight: 800;
-		text-decoration: none;
-		border: var(--panel-border);
-		border-radius: var(--radius);
-		box-shadow: 4px 4px 0 var(--bone);
-	}
-	.role {
-		margin: 8px 0 0;
-		font-weight: 700;
-		color: var(--accent);
-	}
-	.mission-links {
-		display: flex;
-		gap: 16px;
-	}
-	.timeline {
-		padding-left: 40px;
-	}
-	.links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 24px;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-</style>

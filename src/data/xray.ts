@@ -4,7 +4,7 @@
 export const site = {
 	name: 'Raj Joshi',
 	kicker: 'RAJ JOSHI · SOFTWARE ENGINEER · MUMBAI',
-	kickerOn: '<h1> · the one line every section below must prove',
+	kickerOn: '<h1>the one line every section below must prove</h1>',
 	headline: 'I make complex systems',
 	headlineAccent: 'visible',
 	intro:

@@ -3,6 +3,13 @@
 import '../../styles/global.css';
 import profile from '../../data/profile.json';
 import poses from '../../../public/hero/poses.json';
+import HeroScene from '../../components/motion/HeroScene';
+import HeroTitle from '../../components/motion/HeroTitle';
+import PoseEnter from '../../components/motion/PoseEnter';
+import Reveal from '../../components/motion/Reveal';
+import ScrollProgress from '../../components/motion/ScrollProgress';
+import Spine from '../../components/motion/Spine';
+import TiltCard from '../../components/motion/TiltCard';
 
 const { name, role, tagline, location, cta, origin, powers, missions, personality, timeline, contact } = profile;
 const ext = { target: '_blank', rel: 'noopener noreferrer' };
@@ -11,11 +18,13 @@ const img = (id: string) => `/hero/${id}.webp`;
 // same size in each section; a crouch is simply shorter than a stretch.
 const POSE_SCALE = 0.17;
 const pose = (id: keyof typeof poses, x: number) => ({
-	class: `head-pose ${id}`,
+	id,
 	src: img(id),
-	alt: '',
-	style: `--x: ${x}; --h: ${Math.round(poses[id].h * POSE_SCALE)}px`,
+	x,
+	h: Math.round(poses[id].h * POSE_SCALE),
 });
+// Every power, run together for the ticker under the hero.
+const ticker = powers.flatMap((p) => p.items);
 // Timeline chapters: each study or work milestone opens a chapter; wins attach to the chapter they happened in.
 type Entry = (typeof timeline)[number] & { where?: string };
 const chapters: (Entry & { wins: Entry[] })[] = [];
@@ -37,15 +46,18 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 		<title>{name}</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Space+Grotesk:wght@400;500;700&display=swap" />
+		<!-- Motion islands render their pre-entrance state (hidden, offset); without JS, show everything in place. -->
+		<noscript><style>astro-island [style*='opacity'] { opacity: 1 !important; transform: none !important; }</style></noscript>
 	</head>
 	<body class="banner">
+		<ScrollProgress client:load />
 		<header class="hero">
-			<div class="hero-banner" aria-hidden="true"><img src={img('scene')} alt="" /></div>
+			<div class="hero-banner" aria-hidden="true"><HeroScene client:load src={img('scene')} /></div>
 			<div class="hero-inner">
 				<div class="hero-copy">
 					<p class="sfx-small">ZZZIP!</p>
-					<h1>{name}</h1>
+					<HeroTitle client:load text={name} />
 					<p class="role">{role}</p>
 					<p class="tagline">{tagline}</p>
 					<p class="where">{location}</p>
@@ -62,29 +74,48 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 			</div>
 		</header>
 
+		<div class="ticker-wrap" aria-hidden="true">
+			<div class="ticker">
+				<div class="ticker-track">
+					{
+						[0, 1].map(() =>
+							ticker.map((t) => (
+								<span class="ticker-item">
+									{t}
+									<svg viewBox="0 0 20 20"><polygon points="10,0 12.2,7 20,7 13.6,11.4 15.8,18.2 10,14 4.2,18.2 6.4,11.4 0,7 7.8,7" /></svg>
+								</span>
+							)),
+						)
+					}
+				</div>
+			</div>
+		</div>
+
 		<main>
 			<section id="origin">
 				<div class="section-head">
 					<h2 class="sfx">Origin story</h2>
-					<img {...pose('crouch', 0.42)} />
+					<PoseEnter client:visible {...pose('crouch', 0.42)} />
 				</div>
-				<div class="panel origin">
-					{origin.map((line) => <p>{line}</p>)}
-				</div>
+				<Reveal client:visible>
+					<div class="panel origin">
+						{origin.map((line) => <p>{line}</p>)}
+					</div>
+				</Reveal>
 			</section>
 
 			<section id="powers">
 				<div class="section-head">
 					<h2 class="sfx">Powers</h2>
-					<img {...pose('web-shot', 0.52)} />
+					<PoseEnter client:visible {...pose('web-shot', 0.52)} />
 				</div>
 				<div class="grid">
 					{
-						powers.map((p) => (
-							<div class="panel power">
+						powers.map((p, n) => (
+							<Reveal client:visible delay={(n % 3) * 0.08} className="panel power">
 								<h3>{p.name}</h3>
 								<p>{p.items.map((i) => <span class="tag">{i}</span>)}</p>
-							</div>
+							</Reveal>
 						))
 					}
 				</div>
@@ -93,12 +124,12 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 			<section id="missions">
 				<div class="section-head">
 					<h2 class="sfx">Missions</h2>
-					<img {...pose('swing-low', 0.62)} />
+					<PoseEnter client:visible {...pose('swing-low', 0.62)} />
 				</div>
 				<div class="grid">
 					{
 						missions.map((m, i) => (
-							<article class="panel mission">
+							<TiltCard client:visible className="panel mission">
 								<p class="mno">Mission {String(i + 1).padStart(2, '0')}</p>
 								<h3>{m.title}</h3>
 								<p>{m.summary}</p>
@@ -108,7 +139,7 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 										{m.links.map((l) => <a class="btn small" href={l.href} {...ext}>{l.label}</a>)}
 									</p>
 								)}
-							</article>
+							</TiltCard>
 						))
 					}
 				</div>
@@ -117,17 +148,17 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 			<section id="personality">
 				<div class="section-head">
 					<h2 class="sfx">Off duty</h2>
-					<img {...pose('flip', 0.72)} />
+					<PoseEnter client:visible {...pose('flip', 0.72)} />
 				</div>
 				<div class="grid four">
 					{
-						personality.map((p) => {
+						personality.map((p, n) => {
 							const [title, rest] = p.split(': ');
 							return (
-								<div class="panel duty">
+								<Reveal client:visible delay={n * 0.08} className="panel duty">
 									<h3>{title}</h3>
 									<p>{rest}</p>
-								</div>
+								</Reveal>
 							);
 						})
 					}
@@ -137,13 +168,14 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 			<section id="timeline">
 				<div class="section-head">
 					<h2 class="sfx">Timeline</h2>
-					<img {...pose('land', 0.82)} />
+					<PoseEnter client:visible {...pose('land', 0.82)} />
 				</div>
 				<ol class="chapters">
+					<Spine client:visible />
 					{
-						chapters.map((c) => (
+						chapters.map((c, n) => (
 							<li class={`chapter ${c.kind}`}>
-								<article class="panel chapter-card">
+								<Reveal client:visible from={n % 2 ? 'right' : 'left'} className="panel chapter-card">
 									<p class="c-meta">
 										<span class="c-kind">{chapterLabel[c.kind as keyof typeof chapterLabel]}</span>
 										<span class="c-when">{c.when}</span>
@@ -160,7 +192,7 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 											))}
 										</ul>
 									)}
-								</article>
+								</Reveal>
 							</li>
 						))
 					}
@@ -170,17 +202,17 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 			<section id="contact">
 				<div class="section-head">
 					<h2 class="sfx">Send a signal</h2>
-					<img {...pose('wave', 0.92)} />
+					<PoseEnter client:visible {...pose('wave', 0.92)} />
 				</div>
 				<div class="contact">
-					<div class="panel signal">
+					<Reveal client:visible className="panel signal">
 						<p class="signal-line">Building something in finance, AI or learning? Let's talk.</p>
 						<p class="links">
 							{contact.email && <a class="btn primary" href={`mailto:${contact.email}`}>Email me</a>}
 							{contact.github && <a class="btn small" href={contact.github} {...ext}>GitHub</a>}
 							{contact.linkedin && <a class="btn small" href={contact.linkedin} {...ext}>LinkedIn</a>}
 						</p>
-					</div>
+					</Reveal>
 				</div>
 			</section>
 		</main>
@@ -382,16 +414,6 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				color: var(--accent);
 				-webkit-text-stroke: 1px var(--ink);
 			}
-			.power,
-			.mission,
-			.duty {
-				transition: transform 0.15s;
-			}
-			.power:hover,
-			.mission:hover,
-			.duty:hover {
-				transform: translate(-3px, -3px) rotate(-0.5deg);
-			}
 			.section-head {
 				position: relative;
 			}
@@ -402,16 +424,18 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				z-index: 1;
 				left: calc(var(--x) * 100%);
 				bottom: -46px;
-				height: var(--h);
 				transform: translateX(-50%);
 			}
-			.head-pose.flip {
-				transform: translateX(-50%) rotate(-12deg);
+			.head-pose img {
+				display: block;
+				height: var(--h);
+				width: auto;
+				cursor: grab;
 			}
 			/* Room under the overlapping pose so it never covers text. */
-			.section-head + .panel,
+			.section-head + astro-island .panel,
 			.section-head + .contact .panel,
-			.section-head + .grid > :nth-child(-n + 4) {
+			.section-head + .grid > :nth-child(-n + 4) .panel {
 				padding-top: 64px;
 			}
 			.mno {
@@ -443,21 +467,26 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				padding: 8px 0;
 				list-style: none;
 			}
-			.chapters::before {
-				content: '';
+			.spine {
 				position: absolute;
 				left: 50%;
 				top: 0;
 				bottom: 0;
 				width: 6px;
 				transform: translateX(-50%);
+				background: repeating-linear-gradient(rgba(244, 239, 228, 0.15) 0 14px, transparent 14px 22px);
+			}
+			/* The saffron dashes fill in over the faint track as the reader scrolls. */
+			.spine-fill {
+				height: 100%;
+				transform-origin: top;
 				background: repeating-linear-gradient(var(--accent) 0 14px, transparent 14px 22px);
 			}
 			.chapter {
 				position: relative;
 				width: calc(50% - 40px);
 			}
-			.chapter:nth-child(even) {
+			.chapter:nth-of-type(even) {
 				margin-left: calc(50% + 40px);
 			}
 			/* Stagger: each chapter starts before the one opposite it ends. */
@@ -485,11 +514,11 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				border-radius: 50%;
 				background: var(--accent);
 			}
-			.chapter:nth-child(even)::before {
+			.chapter:nth-of-type(even)::before {
 				right: auto;
 				left: -40px;
 			}
-			.chapter:nth-child(even)::after {
+			.chapter:nth-of-type(even)::after {
 				right: auto;
 				left: -51px;
 			}
@@ -588,6 +617,153 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				margin: 0;
 			}
 
+			body {
+				font-family: 'Space Grotesk', system-ui, sans-serif;
+			}
+			:focus-visible {
+				outline: 3px solid var(--accent);
+				outline-offset: 3px;
+			}
+
+			/* Motion layer */
+			.scroll-progress {
+				position: fixed;
+				inset: 0 0 auto;
+				z-index: 10;
+				height: 5px;
+				transform-origin: left;
+				background: var(--accent);
+				box-shadow: 0 2px 0 var(--ink);
+			}
+			.hero h1 .word {
+				display: inline-block;
+				white-space: nowrap;
+				margin-right: 0.22em;
+			}
+			.hero h1 .letter {
+				display: inline-block;
+			}
+			/* The rest of the hero copy lands just after the name finishes popping in. */
+			.hero-copy > :not(h1, astro-island) {
+				animation: drop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+			}
+			.hero-copy > .sfx-small {
+				animation-name: sfx-pop;
+			}
+			.hero-copy > .role {
+				animation-delay: 0.7s;
+			}
+			.hero-copy > .tagline {
+				animation-delay: 0.8s;
+			}
+			.hero-copy > .where {
+				animation-delay: 0.9s;
+			}
+			.hero-copy > .actions {
+				animation-delay: 1s;
+			}
+			@keyframes drop-in {
+				from {
+					opacity: 0;
+					transform: translateY(18px);
+				}
+			}
+			@keyframes sfx-pop {
+				from {
+					opacity: 0;
+					transform: rotate(-30deg) scale(0.2);
+				}
+			}
+			.btn {
+				cursor: pointer;
+				transition:
+					transform 0.15s,
+					box-shadow 0.15s;
+			}
+			.btn:hover {
+				transform: translate(-2px, -2px);
+			}
+			.btn:active {
+				transform: translate(3px, 3px);
+				box-shadow: none;
+			}
+			/* Skills ticker between the hero and the story. */
+			/* Clips the tilted ticker's corners so they never scroll the page sideways. */
+			.ticker-wrap {
+				overflow: hidden;
+				margin-top: -10px;
+				padding-bottom: 14px;
+			}
+			.ticker {
+				border-bottom: 4px solid var(--ink);
+				background: var(--accent);
+				color: var(--ink);
+				transform: rotate(-1.2deg) scale(1.02);
+				box-shadow: 0 6px 0 var(--ink);
+			}
+			.ticker-track {
+				display: flex;
+				width: max-content;
+				animation: ticker 60s linear infinite;
+			}
+			.ticker:hover .ticker-track {
+				animation-play-state: paused;
+			}
+			.ticker-item {
+				display: inline-flex;
+				align-items: center;
+				gap: 18px;
+				padding: 10px 0 10px 18px;
+				font: 1.4rem/1 'Bangers', Impact, sans-serif;
+				letter-spacing: 0.06em;
+				white-space: nowrap;
+			}
+			.ticker-item svg {
+				width: 16px;
+				height: 16px;
+				fill: var(--ink);
+			}
+			@keyframes ticker {
+				to {
+					transform: translateX(-50%);
+				}
+			}
+			/* Section titles slam in as they scroll into view, where the browser supports view timelines. */
+			@supports (animation-timeline: view()) {
+				.section-head .sfx {
+					animation: sfx-slam linear both;
+					animation-timeline: view();
+					animation-range: entry 10% cover 30%;
+				}
+			}
+			@keyframes sfx-slam {
+				from {
+					opacity: 0;
+					transform: rotate(-12deg) scale(1.8);
+				}
+				to {
+					opacity: 1;
+					transform: rotate(-2deg) scale(1);
+				}
+			}
+			.mission {
+				position: relative;
+				overflow: hidden;
+				transform-style: preserve-3d;
+			}
+			.spotlight {
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+			}
+			@media (prefers-reduced-motion: reduce) {
+				.hero-copy > *,
+				.ticker-track,
+				.section-head .sfx {
+					animation: none !important;
+				}
+			}
+
 			@media (max-width: 760px) {
 				.hero-inner,
 				.banner .hero-inner {
@@ -622,18 +798,17 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				.head-pose {
 					left: auto;
 					right: 0;
-					height: calc(var(--h) * 0.6);
 					bottom: -28px;
 					transform: none;
 				}
-				.head-pose.flip {
-					transform: rotate(-12deg);
+				.head-pose img {
+					height: calc(var(--h) * 0.6);
 				}
-				.chapters::before {
+				.spine {
 					left: 11px;
 				}
 				.chapter,
-				.chapter:nth-child(even) {
+				.chapter:nth-of-type(even) {
 					width: auto;
 					margin-left: 40px;
 				}
@@ -641,11 +816,11 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 					margin-top: 0;
 				}
 				.chapter::before,
-				.chapter:nth-child(even)::before {
+				.chapter:nth-of-type(even)::before {
 					display: none;
 				}
 				.chapter::after,
-				.chapter:nth-child(even)::after {
+				.chapter:nth-of-type(even)::after {
 					left: -40px;
 					right: auto;
 				}

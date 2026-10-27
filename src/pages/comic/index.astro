@@ -7,6 +7,8 @@ import HeroScene from '../../components/motion/HeroScene';
 import HeroTitle from '../../components/motion/HeroTitle';
 import PoseEnter from '../../components/motion/PoseEnter';
 import Reveal from '../../components/motion/Reveal';
+import HeroIntro from '../../components/motion/HeroIntro';
+import ReplayIntro from '../../components/motion/ReplayIntro';
 import ScrollProgress from '../../components/motion/ScrollProgress';
 import Spine from '../../components/motion/Spine';
 import TiltCard from '../../components/motion/TiltCard';
@@ -25,6 +27,13 @@ const pose = (id: keyof typeof poses, x: number) => ({
 });
 // Every power, run together for the ticker under the hero.
 const ticker = powers.flatMap((p) => p.items);
+// Each mission's trailer and poster live under public/media/missions/, named after the title.
+const slug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const trailer = (title: string) => ({
+	poster: `/media/missions/${slug(title)}.jpg`,
+	video: `/media/missions/${slug(title)}.mp4`,
+	alt: `Trailer for ${title}`,
+});
 // Timeline chapters: each study or work milestone opens a chapter; wins attach to the chapter they happened in.
 type Entry = (typeof timeline)[number] & { where?: string };
 const chapters: (Entry & { wins: Entry[] })[] = [];
@@ -48,12 +57,24 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Space+Grotesk:wght@400;500;700&display=swap" />
 		<!-- Motion islands render their pre-entrance state (hidden, offset); without JS, show everything in place. -->
+		<script is:inline>
+			// Decide before first paint whether the intro plays: once per visit, never with reduced motion or Save-Data.
+			try {
+				if (
+					!sessionStorage.getItem('intro-seen') &&
+					!matchMedia('(prefers-reduced-motion: reduce)').matches &&
+					!navigator.connection?.saveData
+				)
+					document.documentElement.dataset.intro = 'play';
+			} catch {}
+		</script>
 		<noscript><style>astro-island [style*='opacity'] { opacity: 1 !important; transform: none !important; }</style></noscript>
 	</head>
 	<body class="banner">
 		<ScrollProgress client:load />
 		<header class="hero">
 			<div class="hero-banner" aria-hidden="true"><HeroScene client:load src={img('scene')} /></div>
+			<HeroIntro client:load src="/media/hero/swing.mp4" poster="/media/hero/swing-end.jpg" />
 			<div class="hero-inner">
 				<div class="hero-copy">
 					<p class="sfx-small">ZZZIP!</p>
@@ -64,6 +85,7 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 					<div class="actions">
 						<a class="btn primary" href={cta.href}>{cta.label}</a>
 						<a class="btn ghost" href="#contact">Send a signal</a>
+						<ReplayIntro client:idle />
 					</div>
 				</div>
 				<figure class="hero-art">
@@ -129,7 +151,7 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				<div class="grid">
 					{
 						missions.map((m, i) => (
-							<TiltCard client:visible className="panel mission">
+							<TiltCard client:visible className="panel mission" media={trailer(m.title)}>
 								<p class="mno">Mission {String(i + 1).padStart(2, '0')}</p>
 								<h3>{m.title}</h3>
 								<p>{m.summary}</p>
@@ -626,6 +648,10 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 			}
 
 			/* Motion layer */
+			/* Cards that slide in from the side start offscreen; never let them scroll the page sideways. */
+			main {
+				overflow-x: clip;
+			}
 			.scroll-progress {
 				position: fixed;
 				inset: 0 0 auto;
@@ -756,6 +782,60 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 				inset: 0;
 				pointer-events: none;
 			}
+			/* Intro video: covers the hero until it ends or is skipped; the hero copy holds its entrance meanwhile. */
+			.intro {
+				position: absolute;
+				inset: 0;
+				z-index: 5;
+				display: grid;
+				place-items: center;
+				background: var(--night);
+			}
+			.intro video {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+			.intro-skip {
+				position: absolute;
+				right: 16px;
+				bottom: 24px;
+				background: rgba(11, 21, 48, 0.75);
+				border-color: var(--bone);
+				color: var(--bone);
+			}
+			html[data-intro='play'] .hero-copy > * {
+				animation-play-state: paused;
+			}
+			html[data-intro='play'] .scroll-progress {
+				opacity: 0;
+			}
+			.replay {
+				gap: 8px;
+				background: none;
+				font: inherit;
+				font-weight: 800;
+			}
+			.replay svg {
+				width: 16px;
+				height: 16px;
+				fill: currentColor;
+			}
+			/* Mission trailer sits at the top of the card as a framed comic panel. */
+			.mission-media {
+				margin: -8px 0 16px;
+				aspect-ratio: 16 / 9;
+				overflow: hidden;
+				border: var(--panel-border);
+				border-radius: 4px;
+				background: var(--night);
+			}
+			.mission-media video {
+				display: block;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
 			@media (prefers-reduced-motion: reduce) {
 				.hero-copy > *,
 				.ticker-track,
@@ -765,6 +845,10 @@ const chapterLabel = { education: 'Study', work: 'Work' };
 			}
 
 			@media (max-width: 760px) {
+				/* Portrait screens: show the whole widescreen intro rather than a cropped slice. */
+				.intro video {
+					object-fit: contain;
+				}
 				.hero-inner,
 				.banner .hero-inner {
 					grid-template-columns: 1fr;
